@@ -58,7 +58,7 @@ class DataServiceTest {
     @DisplayName("This method will try to read an expired data from repository")
     void readExpiredDataFromRepository() {
         Data expectedData = new Data(gson.toJson(jsonObject),Long.toString(System.currentTimeMillis()-100L));
-        Mockito.when(dataRepository.findByKey("1")).thenReturn(java.util.Optional.of(expectedData));
+        Mockito.when(dataRepository.findByKey(Mockito.anyString())).thenReturn(java.util.Optional.of(expectedData));
         ValueExpiredException exception = assertThrows(ValueExpiredException.class,()->dataService.readData("1"));
         Assertions.assertThat(exception).hasMessageContaining("expired");
 
@@ -104,9 +104,10 @@ class DataServiceTest {
 
     @Test
     @DisplayName("This method will try to add an data whose key is already been used")
-    void addDuplicateDataToRepository(){
-        Data expectedData = new Data(gson.toJson(jsonObject),Long.toString(System.currentTimeMillis()-100L));
+    void addDuplicateDataToRepository() throws ValueExpiredException, DataNotFoundException {
+        Data expectedData = new Data(gson.toJson(jsonObject),Long.toString(System.currentTimeMillis()+5000L));
         Mockito.when(dataRepository.exits("1")).thenReturn(true);
+        Mockito.when(dataRepository.findByKey("1")).thenReturn(java.util.Optional.of(expectedData));
         assertThrows(DuplicateKeyException.class,()->dataService.addData("1", expectedData));
     }
 

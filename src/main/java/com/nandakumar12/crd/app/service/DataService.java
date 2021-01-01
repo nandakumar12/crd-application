@@ -94,7 +94,8 @@ public class DataService {
     if (key != null && value != null) {
       if (dataRepository.exits(key)) {
         try{
-          if(isValid(dataRepository.findByKey(key).get(),key)){
+          Optional<Data> data = dataRepository.findByKey(key);
+          if(data.isPresent() && isValid(data.get(),key)){
             throw new DuplicateKeyException("Key already exists !");
           }
         } catch (ValueExpiredException | DataNotFoundException e) {

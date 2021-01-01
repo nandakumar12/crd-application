@@ -30,6 +30,7 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+<!--		for getters and setters-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -40,17 +41,20 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<!--		for parsing json data -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.8.6</version>
 		</dependency>
+<!--		to mock dependencies during unit test -->
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<version>3.6.28</version>
 			<scope>test</scope>
 		</dependency>
+<!--		to utilize more meaningful assertions during unit test-->
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>

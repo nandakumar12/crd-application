@@ -63,7 +63,10 @@ public class DataParser {
 
   boolean checkTTLValidity(String ttl) throws InvalidDataException {
     try {
-      Long.parseLong(ttl);
+      long ttlNumber = Long.parseLong(ttl);
+      if(ttlNumber<0){
+        throw new NumberFormatException("Number is negative");
+      }
     } catch (NumberFormatException e) {
       throw new InvalidDataException("The ttl is not an valid number");
     }
