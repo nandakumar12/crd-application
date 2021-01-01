@@ -34,7 +34,7 @@ public class CustomExceptionHandler {
   @ExceptionHandler(InvalidDataException.class)
   public ResponseEntity<Object> handleInvalidDataException(InvalidDataException exception) {
     log.error(exception.getMessage());
-    return ResponseEntity.badRequest().body(new ResponseMessage(exception.getMessage()));
+    return ResponseEntity.badRequest().body(new ResponseMessage(getCause(exception).getMessage()));
   }
 
 
@@ -50,6 +50,15 @@ public class CustomExceptionHandler {
   @ExceptionHandler(CrdException.class)
   public ResponseEntity<Object> handleException(Exception exception) {
     log.error(exception.getMessage());
-    return ResponseEntity.ok().body(new ResponseMessage(exception.getMessage()));
+    return ResponseEntity.ok().body(new ResponseMessage(getCause(exception).getMessage()));
+  }
+
+  Throwable getCause(Throwable e){
+    Throwable cause = null;
+    Throwable res = e;
+    while ((cause=res.getCause())!=null && res!=cause){
+      res=cause;
+    }
+    return res;
   }
 }

@@ -3,6 +3,7 @@ package com.nandakumar12.crd.app.controller;
 import com.nandakumar12.crd.app.exception.*;
 import com.nandakumar12.crd.app.model.Data;
 import com.nandakumar12.crd.app.model.ResponseMessage;
+import com.nandakumar12.crd.app.repository.DataRepository;
 import com.nandakumar12.crd.app.service.DataParser;
 import com.nandakumar12.crd.app.service.DataService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ public class CrdController {
 
   @Autowired
   DataParser dataParser;
-
 
   @GetMapping(value = "/data")
   public ResponseEntity<Object> getData(@RequestParam("key") String key)
@@ -52,4 +52,5 @@ public class CrdController {
     log.info("Exec controller");
     return ResponseEntity.ok().body(dataService.deleteData(key).get());
   }
+
 }

@@ -12,11 +12,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Repository;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * This is the utility class which we will use to interact with our datastore (currently file)
  *
- * @author  Nandakumar12
+ * @author Nandakumar12
  */
 @Repository
 @Slf4j
@@ -39,10 +39,9 @@ public class DataRepository {
   Map<String, Data> data = null;
 
   /**
-   * This method will be automatically invoked by spring after the bean creation
-   * this will read the data from datastore and initialize into in-memory variable {@link DataRepository#data}
-   * for faster access
-   *
+   * This method will be automatically invoked by spring after the bean creation this will read the
+   * data from datastore and initialize into in-memory variable {@link DataRepository#data} for
+   * faster access
    *
    * @return nothing
    * @throws IOException if some error occurs during reading the file
@@ -62,7 +61,7 @@ public class DataRepository {
       Type type = new TypeToken<ConcurrentHashMap<String, Data>>() {}.getType();
       data = gson.fromJson(new FileReader(file), type);
     }
-    if(data==null){
+    if (data == null) {
       data = new ConcurrentHashMap<>();
     }
   }
@@ -79,41 +78,47 @@ public class DataRepository {
   @PreDestroy
   void writeDataToFile() throws IOException, DataStoreSizeExceeded {
     Gson gson = new Gson();
-    log.info("writing data to data store..");
     String json = gson.toJson(data);
+    ByteBuffer buffer = null;
     if (json.getBytes(StandardCharsets.UTF_8).length / (1024 * 1024) > 1024) {
       throw new DataStoreSizeExceeded("The data store size is greater than 1Gb");
     }
-    if(data!=null){
-      try (FileWriter fw = new FileWriter(filePath + "\\data.json")) {
-        fw.write(json);
+    if (data != null) {
+      try (FileOutputStream fileOutputStream = new FileOutputStream(filePath + "\\data.json")) {
+        log.info("writing data to data store.." + data);
+        FileChannel fileChannel = fileOutputStream.getChannel();
+        FileLock fileLock = fileChannel.tryLock();
+        if (fileLock == null) {
+          log.info("cant able to acquire lock");
+          return;
+        }
+        buffer = ByteBuffer.wrap(json.getBytes(StandardCharsets.UTF_8));
+        buffer.put(json.getBytes(StandardCharsets.UTF_8));
+        buffer.flip();
+        while (buffer.hasRemaining()) {
+          fileChannel.write(buffer);
+        }
       }
     }
-
   }
 
   /**
    * This method will read and return the respective value for the provided key
    *
    * @param key this is the key of the respective value to be retrieved
-   *
-   * @return Optional<Data> this the respective data for the given key that is enclosed in a optional
-   *
+   * @return Optional<Data> this the respective data for the given key that is enclosed in a
+   *     optional
    */
   public Optional<Data> findByKey(String key) {
     return Optional.ofNullable(data.get(key));
   }
 
-
   /**
-   * This method will delete and return the respective value for the provided key
-   * from the datastore
+   * This method will delete and return the respective value for the provided key from the datastore
    *
    * @param key this is the key of the respective value to be deleted
-   *
    * @return Data this the respective data for the given key which is being deleted
    * @throws DataNotFoundException when no data is found for the given key
-   *
    */
   public Data deleteByKey(String key) throws DataNotFoundException {
     Data deletedData = null;
@@ -126,7 +131,7 @@ public class DataRepository {
   }
 
   public boolean exits(String key) {
-    log.info("the data is "+data);
+    log.info("the data is " + data);
     return data.containsKey(key);
   }
 
@@ -135,9 +140,7 @@ public class DataRepository {
    *
    * @param key this is the key of the respective value to be stored
    * @param value this is the value to be stored
-   *
    * @return Data this the respective data for the given key which is being stored
-   *
    */
   public Data createData(String key, Data value) {
     if (!value.getTimeToLive().equals("0")) {
