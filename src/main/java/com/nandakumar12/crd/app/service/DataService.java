@@ -93,7 +93,13 @@ public class DataService {
       throws DuplicateKeyException, InvalidDataException {
     if (key != null && value != null) {
       if (dataRepository.exits(key)) {
-        throw new DuplicateKeyException("Key already exists !");
+        try{
+          if(isValid(dataRepository.findByKey(key).get(),key)){
+            throw new DuplicateKeyException("Key already exists !");
+          }
+        } catch (ValueExpiredException | DataNotFoundException e) {
+          addData(key, value);
+        }
       }
       log.info("The ttl is " + value.getTimeToLive());
       return CompletableFuture.completedFuture(dataRepository.createData(key, value));
