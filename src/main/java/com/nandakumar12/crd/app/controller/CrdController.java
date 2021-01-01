@@ -48,8 +48,8 @@ public class CrdController {
 
   @DeleteMapping(value = "/data")
   public ResponseEntity<Object> deleteData(@RequestParam("key") String key)
-      throws DataNotFoundException, ValueExpiredException {
+          throws DataNotFoundException, ValueExpiredException, ExecutionException, InterruptedException {
     log.info("Exec controller");
-    return ResponseEntity.ok().body(dataService.deleteData(key));
+    return ResponseEntity.ok().body(dataService.deleteData(key).get());
   }
 }

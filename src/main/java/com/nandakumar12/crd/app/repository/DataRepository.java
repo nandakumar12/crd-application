@@ -36,7 +36,7 @@ public class DataRepository {
   @Value("${application.file-path:./}")
   String filePath;
 
-  Map<String, Data> data;
+  Map<String, Data> data = null;
 
   /**
    * This method will be automatically invoked by spring after the bean creation
@@ -53,7 +53,6 @@ public class DataRepository {
     File file = new File(filePath + "\\data.json");
     if (file.createNewFile()) {
       log.info("File is created!");
-      data = new ConcurrentHashMap<>();
     } else {
       if ((double) file.length() / (1024 * 1024) > 1024) {
         throw new DataStoreSizeExceeded("The data store size is greater than 1Gb");
@@ -62,6 +61,9 @@ public class DataRepository {
       log.info("File already exists.");
       Type type = new TypeToken<ConcurrentHashMap<String, Data>>() {}.getType();
       data = gson.fromJson(new FileReader(file), type);
+    }
+    if(data==null){
+      data = new ConcurrentHashMap<>();
     }
   }
 
