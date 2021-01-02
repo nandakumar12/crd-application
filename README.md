@@ -1,12 +1,12 @@
 
 # Simple key value data store with CRD operations
-Build a file-based key-value data store that supports the basic CRD (create, read, and delete) operations. This data store is meant to be used as a local storage for one single process on one laptop. The data store must be exposed as a library to clients that can instantiate a class and work with the data store.
+Build a file-based key-value data store that supports the basic CRD (create, read, and delete) operations. This data store is meant to be used as a local storage for one single process on one laptop. 
 ## Configuration
-Configuring the data store file path <br>
+ Configuring the data store file path
 Edit the following file to set an custom file path
 
-`/src/main/resources/application.yaml`
-example: 
+`/src/main/resources/application.yaml`<br>
+Example: 
 > file-path: C:/custom-folder/
 
 ## How to run this project
@@ -30,4 +30,22 @@ or Package it as an jar file then execute
 > ./mvnw package
 > java -jar CRD-0.0.1-SNAPSHOT.jar
 
+## REST Endpoints
+#### Create Data
+> **POST** /api/crd/data?**key=123**
+
+request body 
+	
+
+    {
+    	"key1":"value",
+    	"timeToLive":"50"
+    }
+### Read Data
+
+> **GET** /api/crd/data?**key=123**
+
+### Delete Data
+
+>  **DELETE**  /api/crd/data?**key=123**
 
